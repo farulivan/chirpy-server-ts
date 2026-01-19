@@ -8,7 +8,7 @@ export async function handlerUsers(req: Request, res: Response) {
     email: string;
   };
 
-  const parsedBody = req.body as RequestBody;
+  const parsedBody = req.body as Partial<RequestBody>;
 
 if (
   !parsedBody ||

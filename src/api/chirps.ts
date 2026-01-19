@@ -1,20 +1,30 @@
 import type { Request, Response } from 'express';
 import { respondWithJSON } from './json.js';
 import { BadRequestError } from './errors.js';
+import { createChirp } from '../db/queries/chirps.js';
 
-export async function handlerChirpsValidate(req: Request, res: Response) {
+export async function handlerChirps(req: Request, res: Response) {
   type RequestBody = {
     body: string;
+    userId: string;
   };
 
-  const parsedBody = req.body as RequestBody;
+  const parsedBody = req.body as Partial<RequestBody>;
 
-  if (!parsedBody || typeof parsedBody.body !== 'string') {
-    // return respondWithError(res, 400, 'Invalid request body structure');
-    throw new Error('Invalid request body structure')
+  if (!parsedBody || typeof parsedBody !== 'object') {
+    throw new BadRequestError('Invalid request');
   }
 
-  const chirpContent = parsedBody.body;
+  if (typeof parsedBody.body !== 'string' || parsedBody.body.trim().length === 0) {
+    throw new BadRequestError('Invalid chirp');
+  }
+
+  if (typeof parsedBody.userId !== 'string' || parsedBody.userId.trim().length === 0) {
+    throw new BadRequestError('Invalid user id');
+  }
+
+  const chirpContent = parsedBody.body; 
+  const userId = parsedBody.userId; 
 
   if (chirpContent.length > 140) {
     throw new BadRequestError("Chirp is too long. Max length is 140");
@@ -22,7 +32,7 @@ export async function handlerChirpsValidate(req: Request, res: Response) {
 
   const profane = ['kerfuffle', 'sharbert', 'fornax'];
 
-  const words = chirpContent.split(' ');
+  const words = chirpContent.split(/\s+/).filter(Boolean);
 
   const cleanedWords = words.map((word) => {
     // remove trailing punctuation for comparison only
@@ -44,5 +54,14 @@ export async function handlerChirpsValidate(req: Request, res: Response) {
 
   const cleanedBody = cleanedWords.join(' ');
 
-  return respondWithJSON(res, 200, { cleanedBody });
+  const result = await createChirp({
+    body: cleanedBody,
+    userId
+  });
+
+  if (!result) {
+    throw new Error('Failed to save chirp to database');
+  }
+
+  return respondWithJSON(res, 201, result);
 }

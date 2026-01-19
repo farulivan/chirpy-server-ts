@@ -12,7 +12,7 @@ import {
   middlewareMetricsInc,
   middlewareError,
 } from "./api/middleware.js";
-import { handlerChirpsValidate } from "./api/chirps.js";
+import { handlerChirps } from "./api/chirps.js";
 import { handlerUsers } from './api/users.js';
 
 import { config } from './config.js';
@@ -39,12 +39,12 @@ app.post("/admin/reset", (req, res, next) => {
   Promise.resolve(handlerReset(req, res)).catch(next);
 });
 
-app.post("/api/validate_chirp", (req, res, next) => {
-  Promise.resolve(handlerChirpsValidate(req, res)).catch(next);
-});
-
 app.post("/api/users", (req, res, next) => {
   Promise.resolve(handlerUsers(req, res).catch(next));
+})
+
+app.post("/api/chirps", (req, res, next) => {
+  Promise.resolve(handlerChirps(req, res).catch(next));
 })
 
 app.use(middlewareError);
