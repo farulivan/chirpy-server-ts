@@ -24,7 +24,7 @@ export function middlewareMetricsInc(
   next: NextFunction
 ) {
   res.on('finish', () => {
-    config.fileserverHits = config.fileserverHits + 1;
+    config.api.fileserverHits = config.api.fileserverHits + 1;
   });
 
   next();
