@@ -12,7 +12,7 @@ import {
   middlewareMetricsInc,
   middlewareError,
 } from "./api/middleware.js";
-import { handlerChirps } from "./api/chirps.js";
+import { handlerChirps, handlerGetChirps, handlerGetOneChirp } from "./api/chirps.js";
 import { handlerUsers } from './api/users.js';
 
 import { config } from './config.js';
@@ -45,6 +45,14 @@ app.post("/api/users", (req, res, next) => {
 
 app.post("/api/chirps", (req, res, next) => {
   Promise.resolve(handlerChirps(req, res).catch(next));
+})
+
+app.get("/api/chirps", (req, res, next) => {
+  Promise.resolve(handlerGetChirps(req, res).catch(next));
+})
+
+app.get("/api/chirps/:id", (req, res, next) => {
+  Promise.resolve(handlerGetOneChirp(req, res).catch(next));
 })
 
 app.use(middlewareError);
