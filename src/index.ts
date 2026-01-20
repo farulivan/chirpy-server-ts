@@ -16,6 +16,7 @@ import { handlerChirps, handlerGetChirps, handlerGetOneChirp } from "./api/chirp
 import { handlerUsers } from './api/users.js';
 
 import { config } from './config.js';
+import { handlerLogin } from './api/auth.js';
 
 const migrationClient = postgres(config.db.url, { max: 1 });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -53,6 +54,10 @@ app.get("/api/chirps", (req, res, next) => {
 
 app.get("/api/chirps/:id", (req, res, next) => {
   Promise.resolve(handlerGetOneChirp(req, res).catch(next));
+})
+
+app.post("/api/login", (req, res, next) => {
+  Promise.resolve(handlerLogin(req, res).catch(next));
 })
 
 app.use(middlewareError);

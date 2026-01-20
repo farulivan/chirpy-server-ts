@@ -15,6 +15,13 @@
       "when": 1768808405831,
       "tag": "0001_huge_dorian_gray",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768919235605,
+      "tag": "0002_cuddly_quasar",
+      "breakpoints": true
     }
   ]
 }
