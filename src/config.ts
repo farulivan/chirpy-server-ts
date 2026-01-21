@@ -8,6 +8,7 @@ type DBConfig = {
 type APIConfig = {
   port: number;
   fileserverHits: number;
+  jwtSecret: string;
 };
 
 process.loadEnvFile();
@@ -28,6 +29,7 @@ export const config: { api: APIConfig; db: DBConfig } = {
   api: {
     port: 8080,
     fileserverHits: 0,
+    jwtSecret: envOrThrow('SECRET'),
   },
   db: {
     url: envOrThrow('DB_URL'),

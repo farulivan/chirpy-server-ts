@@ -1,13 +1,19 @@
 import type { Request, Response } from 'express';
 import { respondWithJSON } from './json.js';
-import { BadRequestError, NotFoundError } from './errors.js';
+import { BadRequestError, NotFoundError, UnauthorizedError } from './errors.js';
 import { createChirp, getChirps, getOneChirp } from '../db/queries/chirps.js';
+import { getBearerToken, validateJWT } from '../auth.js';
+import { config } from '../config.js';
 
 export async function handlerChirps(req: Request, res: Response) {
   type RequestBody = {
     body: string;
-    userId: string;
   };
+  
+  const userId = validateJWT(getBearerToken(req), config.api.jwtSecret);
+  if (!userId || typeof userId !== 'string') {
+    throw new UnauthorizedError('Session expired or invalid. Please log in.');
+  }
 
   const parsedBody = req.body as Partial<RequestBody>;
 
@@ -19,12 +25,7 @@ export async function handlerChirps(req: Request, res: Response) {
     throw new BadRequestError('Invalid chirp');
   }
 
-  if (typeof parsedBody.userId !== 'string' || parsedBody.userId.trim().length === 0) {
-    throw new BadRequestError('Invalid user id');
-  }
-
   const chirpContent = parsedBody.body; 
-  const userId = parsedBody.userId; 
 
   if (chirpContent.length > 140) {
     throw new BadRequestError("Chirp is too long. Max length is 140");
