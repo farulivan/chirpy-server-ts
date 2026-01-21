@@ -1,6 +1,6 @@
-import { eq } from 'drizzle-orm';
+import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { db } from "../index.js";
-import { NewUser, users } from "../schema.js";
+import { NewUser, users, refreshTokens } from "../schema.js";
 
 export async function createUser(user: NewUser): Promise<Omit<NewUser, "hashedPassword">> {
   const [result] = await db
@@ -27,4 +27,23 @@ export async function getUserByEmail(email: string): Promise<NewUser | undefined
     .from(users)
     .where(eq(users.email, email));
   return result;
-} 
+}
+
+export async function getUserFromRefreshToken(token: string): Promise<Pick<NewUser, 'id' | 'email'> | undefined> {
+  const [result] = await db
+    .select({
+      id: users.id,
+      email: users.email,
+    })
+    .from(refreshTokens)
+    .innerJoin(users, eq(refreshTokens.userId, users.id))
+    .where(
+      and(
+        eq(refreshTokens.token, token),
+        isNull(refreshTokens.revokedAt),
+        gt(refreshTokens.expiresAt, sql`now()`)
+      )
+    )
+    .limit(1);
+  return result;
+}

@@ -11,9 +11,6 @@ export async function handlerChirps(req: Request, res: Response) {
   };
   
   const userId = validateJWT(getBearerToken(req), config.api.jwtSecret);
-  if (!userId || typeof userId !== 'string') {
-    throw new UnauthorizedError('Session expired or invalid. Please log in.');
-  }
 
   const parsedBody = req.body as Partial<RequestBody>;
 
