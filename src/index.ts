@@ -13,7 +13,7 @@ import {
   middlewareError,
 } from "./api/middleware.js";
 import { handlerChirps, handlerGetChirps, handlerGetOneChirp } from "./api/chirps.js";
-import { handlerUsers } from './api/users.js';
+import { handlerUsersUpdate, handlerUsersCreate } from './api/users.js';
 
 import { config } from './config.js';
 import { handlerLogin } from './api/auth.js';
@@ -43,7 +43,7 @@ app.post("/admin/reset", (req, res, next) => {
 });
 
 app.post("/api/users", (req, res, next) => {
-  Promise.resolve(handlerUsers(req, res).catch(next));
+  Promise.resolve(handlerUsersCreate(req, res).catch(next));
 })
 
 app.post("/api/chirps", (req, res, next) => {
@@ -68,6 +68,10 @@ app.post("/api/refresh", (req, res, next) => {
 
 app.post("/api/revoke", (req, res, next) => {
   Promise.resolve(handlerRevoke(req, res).catch(next));
+})
+
+app.put("/api/users", (req, res, next) => {
+  Promise.resolve(handlerUsersUpdate(req, res).catch(next));
 })
 
 app.use(middlewareError);

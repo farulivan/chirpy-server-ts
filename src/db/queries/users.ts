@@ -2,18 +2,20 @@ import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { db } from "../index.js";
 import { NewUser, users, refreshTokens } from "../schema.js";
 
-export async function createUser(user: NewUser): Promise<Omit<NewUser, "hashedPassword">> {
+export type UserResponse = Omit<NewUser, "hashedPassword">
+
+export async function createUser(user: NewUser): Promise<UserResponse> {
   const [result] = await db
     .insert(users)
     .values(user)
     .onConflictDoNothing()
     .returning();
-  return {
-    id: result.id,
-    createdAt: result.createdAt,
-    updatedAt: result.updatedAt,
-    email: result.email,
-  };
+
+  if (!result) {
+    throw new Error("User already exists or could not be created");
+  }
+  
+  return omitPassword(result);
 }
 
 export async function deleteUsers() {
@@ -46,4 +48,27 @@ export async function getUserFromRefreshToken(token: string): Promise<Pick<NewUs
     )
     .limit(1);
   return result;
+}
+
+export async function updateUser(userId: string, newEmail: string, newPasswordHash: string): Promise<UserResponse> {
+  const [result] = await db
+    .update(users)
+    .set({
+      email: newEmail,
+      hashedPassword: newPasswordHash,
+    })
+    .where(eq(users.id, userId))
+    .returning();
+  
+  if (!result) {
+    throw new Error("User not found");
+  }
+
+  return omitPassword(result);
+}
+
+// Helper function
+function omitPassword(user: NewUser): UserResponse {
+  const { hashedPassword, ...userWithoutPassword } = user;
+  return userWithoutPassword;
 }
