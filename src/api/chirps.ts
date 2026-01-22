@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { respondWithJSON } from './json.js';
-import { BadRequestError, NotFoundError, UnauthorizedError } from './errors.js';
-import { createChirp, getChirps, getOneChirp } from '../db/queries/chirps.js';
+import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from './errors.js';
+import { createChirp, deleteChirp, getChirps, getOneChirp } from '../db/queries/chirps.js';
 import { getBearerToken, validateJWT } from '../auth.js';
 import { config } from '../config.js';
 
@@ -88,4 +88,28 @@ export async function handlerGetOneChirp(req: Request, res: Response) {
   }
 
   return respondWithJSON(res, 200, result);
+}
+
+export async function handlerDeleteChirp(req: Request, res: Response) {
+  const { id } = req.params;
+
+  if (!id || typeof id !== 'string') {
+    throw new BadRequestError('Invalid chirp ID');
+  }
+  
+  const userId = validateJWT(getBearerToken(req), config.api.jwtSecret);
+  
+  const chirp = await getOneChirp(id);
+
+  if (!chirp) {
+    throw new NotFoundError('Chirp not found');
+  }
+
+  if (chirp.userId !== userId) {
+    throw new ForbiddenError('You are not allowed to delete this chirp');
+  }
+
+  await deleteChirp(id);
+
+  res.status(204).send();
 }

@@ -12,7 +12,7 @@ import {
   middlewareMetricsInc,
   middlewareError,
 } from "./api/middleware.js";
-import { handlerChirps, handlerGetChirps, handlerGetOneChirp } from "./api/chirps.js";
+import { handlerChirps, handlerDeleteChirp, handlerGetChirps, handlerGetOneChirp } from "./api/chirps.js";
 import { handlerUsersUpdate, handlerUsersCreate } from './api/users.js';
 
 import { config } from './config.js';
@@ -72,6 +72,10 @@ app.post("/api/revoke", (req, res, next) => {
 
 app.put("/api/users", (req, res, next) => {
   Promise.resolve(handlerUsersUpdate(req, res).catch(next));
+})
+
+app.delete("/api/chirps/:id", (req, res, next) => {
+  Promise.resolve(handlerDeleteChirp(req, res).catch(next));
 })
 
 app.use(middlewareError);
