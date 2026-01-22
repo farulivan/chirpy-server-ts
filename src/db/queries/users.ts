@@ -67,6 +67,16 @@ export async function updateUser(userId: string, newEmail: string, newPasswordHa
   return omitPassword(result);
 }
 
+export async function upgradeUserChirpyRed(userId: string): Promise<boolean> {
+  const [updated] = await db
+    .update(users)
+    .set({ isChirpyRed: true })
+    .where(eq(users.id, userId))
+    .returning({ id: users.id }); 
+
+  return !!updated;
+}
+
 // Helper function
 function omitPassword(user: NewUser): UserResponse {
   const { hashedPassword, ...userWithoutPassword } = user;
