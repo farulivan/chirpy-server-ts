@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { respondWithJSON } from './json.js';
-import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from './errors.js';
+import { BadRequestError, ForbiddenError, NotFoundError } from './errors.js';
 import { createChirp, deleteChirp, getChirps, getChirpsByAuthorId, getOneChirp } from '../db/queries/chirps.js';
 import { getBearerToken, validateJWT } from '../auth.js';
 import { config } from '../config.js';
@@ -65,24 +65,17 @@ export async function handlerChirps(req: Request, res: Response) {
 }
 
 export async function handlerGetChirps(req: Request, res: Response) {
-  let authorId = "";
-  let authorIdQuery = req.query.authorId;
-  if (typeof authorIdQuery === "string") authorId = authorIdQuery;
-  
-  if (authorId) {
-    const result = await getChirpsByAuthorId(authorId)
+  const authorId =
+    typeof req.query.authorId === "string" ? req.query.authorId : null;
 
-    if (!result) {
-      throw new Error('Failed to get chirps from database');
-    }
+  const sort = parseSortOrder(req.query.sort);
 
-    return respondWithJSON(res, 200, result);
-  }
-
-  const result = await getChirps();
+  const result = authorId
+    ? await getChirpsByAuthorId(authorId, sort)
+    : await getChirps(sort);
 
   if (!result) {
-    throw new Error('Failed to get chirps from database');
+    throw new Error("Failed to get chirps from database");
   }
 
   return respondWithJSON(res, 200, result);
@@ -126,4 +119,16 @@ export async function handlerDeleteChirp(req: Request, res: Response) {
   await deleteChirp(id);
 
   res.status(204).send();
+}
+
+// Helper Function
+export type SortOrder = "asc" | "desc";
+
+function parseSortOrder(value: unknown, defaultOrder: SortOrder = "asc"): SortOrder {
+  if (typeof value !== "string") return defaultOrder;
+
+  const lower = value.toLowerCase();
+  if (lower === "asc" || lower === "desc") return lower;
+
+  return defaultOrder; // or throw / return 400 depending on API contract
 }
