@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { respondWithJSON } from './json.js';
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from './errors.js';
-import { createChirp, deleteChirp, getChirps, getOneChirp } from '../db/queries/chirps.js';
+import { createChirp, deleteChirp, getChirps, getChirpsByAuthorId, getOneChirp } from '../db/queries/chirps.js';
 import { getBearerToken, validateJWT } from '../auth.js';
 import { config } from '../config.js';
 
@@ -64,7 +64,21 @@ export async function handlerChirps(req: Request, res: Response) {
   return respondWithJSON(res, 201, result);
 }
 
-export async function handlerGetChirps(_: Request, res: Response) {
+export async function handlerGetChirps(req: Request, res: Response) {
+  let authorId = "";
+  let authorIdQuery = req.query.authorId;
+  if (typeof authorIdQuery === "string") authorId = authorIdQuery;
+  
+  if (authorId) {
+    const result = await getChirpsByAuthorId(authorId)
+
+    if (!result) {
+      throw new Error('Failed to get chirps from database');
+    }
+
+    return respondWithJSON(res, 200, result);
+  }
+
   const result = await getChirps();
 
   if (!result) {

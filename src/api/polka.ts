@@ -1,12 +1,20 @@
 import type { Request, Response } from 'express';
-import { BadRequestError, NotFoundError } from './errors.js';
+import { BadRequestError, NotFoundError, UnauthorizedError } from './errors.js';
 import { upgradeUserChirpyRed } from '../db/queries/users.js';
+import { getAPIKey } from '../auth.js';
+import { config } from '../config.js';
 
 export async function handlerUpgradeChirpyRed(req: Request, res: Response) {
   type RequestBody = {
     event: string;
     data: { userId: string };
   };
+
+  const apiKeyFromRequest = getAPIKey(req); 
+
+  if (apiKeyFromRequest !== config.api.polkaKey) {
+    throw new UnauthorizedError('Unauthorized action');
+  }
 
   const body = req.body as unknown;
 

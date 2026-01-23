@@ -9,6 +9,7 @@ type APIConfig = {
   port: number;
   fileserverHits: number;
   jwtSecret: string;
+  polkaKey: string;
 };
 
 process.loadEnvFile();
@@ -30,6 +31,7 @@ export const config: { api: APIConfig; db: DBConfig } = {
     port: 8080,
     fileserverHits: 0,
     jwtSecret: envOrThrow('SECRET'),
+    polkaKey: envOrThrow('POLKA_KEY'),
   },
   db: {
     url: envOrThrow('DB_URL'),
