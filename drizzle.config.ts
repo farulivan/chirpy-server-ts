@@ -5,8 +5,8 @@ if (!process.env.DB_URL) {
 }
 
 export default defineConfig({
-  schema: "src/db/schema.ts",
-  out: "src/db/migrations",
+  schema: "src/infrastructure/database/schema.ts",
+  out: "src/infrastructure/database/migrations",
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DB_URL,
