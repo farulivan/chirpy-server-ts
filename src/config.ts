@@ -23,7 +23,7 @@ function envOrThrow(key: string) {
 }
 
 const migrationConfig: MigrationConfig = {
-  migrationsFolder: './src/db/migrations',
+  migrationsFolder: './src/infrastructure/database/migrations',
 };
 
 export const config: { api: APIConfig; db: DBConfig } = {
